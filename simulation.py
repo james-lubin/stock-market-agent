@@ -12,9 +12,12 @@ def main():
     a new day (see example trainingset)'''
 
     data = lines
-    m = market.Market(data)
-    ag = agent.Agent(m)
+    localMarket = market.Market(data)
+    localAgent = agent.Agent(localMarket)
 
-    ag.update()
+    #agent.update()
+    testSentence = "I hate everything, it all sucks"
+    res = localAgent.analyzeHeadline(testSentence)
+    print("Sentence: ", testSentence, "\tSentiment: ", res)
 
 main()
