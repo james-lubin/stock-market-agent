@@ -1,27 +1,29 @@
 import random
 from tilefeatures import *
 import abc
-
+from natural_language_processing import *
 
 class Agent:
-    def __init__(self, m):
+    def __init__(self,m):
         self.market = m #the market
 
         self.ownedPosition = None #this will typically be an object of the positon that the agent is currently holding
         self.numHoldings = 0 #how many holdings the agent has of a given position
 
         self.cash = 100  #how much our agent has to spend
-
-        self.decisionMaker = LinearSarsaLearner(1,1,.1,.1,1) ##numFeatures, numActions, alpha, epsilon, gamma
+        self.decisionMaker = LinearSarsaLearner(1, 1, .1, .1, 1) ##numFeatures, numActions, alpha, epsilon, gamma
+        self.analyzer = Sentiment()
 
     def update(self):
         '''This will go through the process of a new day in the market'''
         self.market.updateMarket() #first update the market to the new day
+        self.makeChoice()
+        '''make a choice using sarsa and the binary features
+                          that we choose. The choice should be between swapping
+                          positions or choosing to not hold any'''
 
-        self.makeChoice() #make a choice using sarsa and the binary features that we choose. The choice should be between swapping positions or choosing to not hold any
-
-        #self.updateValues() we cannot choose actions and update values based on rewards we will have to figure out how to do this
-
+        '''self.updateValues() we cannot choose actions and update values based on
+        rewards we will have to figure out how to do this'''
         #self.evaluate() evaluate performace of agent, this is issue for much longer down road
 
     def makeChoice(self):
@@ -31,20 +33,25 @@ class Agent:
         position = self.market.getPosition(0)
         self.buyPosition(position)
 
-    def buyPosition(self,newPosition):
+    def buyPosition(self, newPosition):
         "complete transaction of position, for now sell all of old position to buy max of new (assuming partial shares avaiable)"
         if(self.ownedPosition!=None):
-            self.cash = self.ownedPosition[0].getCurrentPrice()*self.ownedPosition[1]
+            self.cash = self.ownedPosition[0].getCurrentPrice() * self.ownedPosition[1]
 
-        self.numHoldings = self.cash/newPosition.getCurrentPrice()
+        self.numHoldings = self.cash / float(newPosition.getCurrentPrice())
         self.ownedPosition = newPosition
+
+    def analyzeHeadline(self, headline):
+        '''Analyze a string (headline) and return whether it is positive, negative or neutral.'''
+        return self.analyzer.runSimpleAnalysis(headline)
 
 class LinearSarsaLearner:
     '''Represents an agent using SARSA with linear value function approximation, assuming binary features.'''
     def __init__(self, numFeatures, numActions, alpha, epsilon, gamma):
-        '''The constructor takes the number of features and actions as well as the step size (alpha), the exploration rate (epsilon), the discount
+        '''The constructor takes the number of features and actions as well as
+        the step size (alpha), the exploration rate (epsilon), the discount
         factor (gamma).'''
-        self.theta = [] #theta represent the weights of the Q function. It is indexed first by action, then by feature index
+        self.theta = [] #theta represents the weights of the Q function. It is indexed first by action, then by feature index
         for a in range(numActions):
             self.theta.append([0]*numFeatures)
 
@@ -85,11 +92,13 @@ class LinearSarsaLearner:
                 curQ = maxQ
                 greedyActions = [action]
             elif curQ == maxQ:
-                #flip a coin on whether we update the max in order to maintain the randomness property
                 greedyActions.append(action)
 
+        #randomly pick from greedy actions
         greedyAction = random.choice(greedyActions)
+
         return greedyAction
+
 
     def learningStep(self, activeFeatures, action, reward, nextFeatures):
         '''Performs a gradient descent SARSA learning step based on the given transition.'''

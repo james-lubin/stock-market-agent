@@ -6,14 +6,19 @@ class TileFeatures:
     '''A class for generating tile-coding features.'''
     def __init__(self, ranges, numTiles, numTilings):
         '''Takes three parameters:
-           ranges - a list/tuple of lists/tuples representing the range of values in the various dimensions. There should be one list/tuple per dimension with two elements, the minimum and maximum value, respectively
-           numTiles - a list of integers indicating how many tiles each dimension should be broken into
+           ranges - a list/tuple of lists/tuples representing the range of
+           values in the various dimensions. There should be one list/tuple per
+           dimension with two elements, the minimum and maximum value, respectively
+
+           numTiles - a list of integers indicating how many tiles each
+           dimension should be broken into
+
            numTilings - many tilings to use (with randomly generated offsets)'''
         self.__ranges = ranges
         self.__numTiles = numTiles
 
         #Calculate how large tiles will be, based on the ranges and the tiling dimensions
-        self.__tileDims = []        
+        self.__tileDims = []
         for i in range(len(self.__ranges)):
             self.__tileDims.append((self.__ranges[i][1]-self.__ranges[i][0])/self.__numTiles[i])
 
@@ -23,7 +28,7 @@ class TileFeatures:
             self.__tilesPerTiling *= self.__numTiles[d]+1 #+1 because the random offset might push a state into the next tile outside the given range
 
         #Generate the offsets (a random number between 0 and 1 representing the portion of a tile to offset)
-        self.__numTilings = numTilings       
+        self.__numTilings = numTilings
         self.__offsets = []
         for i in range(self.__numTilings):
             self.__offsets.append(random.random())
