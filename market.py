@@ -1,14 +1,14 @@
-
-
-
-
+import os
+import simpleSentimentAnalyzer
 class Market:
 
-    def __init__(self,data):
+    def __init__(self, p):
+        positionNames =p
+        print("\\n")
+        self.positions = self.createMarket(p)
         self.numFeatures = 1
         ##positions should be a list of positions
-        self.positions = self.createMarket(positionNames)
-        self.data = data
+        
         self.day = 0
         
 
@@ -54,12 +54,14 @@ class Market:
 class Position:
     def __init__(self,file):
         self.fileName = file
+        #print(os.path.join(os.path.abspath(__file__), "\\Data\\Stocks\\"+self.fileName))
         self.pTag = file.split(".")[0]
-
-        txtFile = open("/data/Stocks/"+self.fileName,"r")
+        print(os.path.abspath(__file__)+"\\Data\\Stocks\\"+self.fileName)
+        txtFile = open("Data\\Stocks\\"+self.fileName+".txt","r")
         txtList = txtFile.readlines()
 
         self.dayIndex = 0
+        self.currentSentiment = 0
 
 
         line  = txtList[self.dayIndex]
@@ -67,19 +69,40 @@ class Position:
         while(line!="2015-01-27"):
             self.dayIndex+=1
             line = txtList[self.dayIndex]
-            date = line.split(",")[0]
+            #print(line)
+            line = line.split(",")[0]
             
         #print(positionData[1])
-        self.currentPrice = txtFile[self.dayIndex].split(",")[1]
+        self.currentPrice = txtList[self.dayIndex].split(",")[1]
         '''we will need to add a list of more features'''
 
     def getCurrentPrice(self):
         print(self.currentPrice)
         return self.currentPrice
 
+    def updateSentiment(self):
+        news = self.getNews() #returns a list of string of current relevent news articles
+        totalSentiment = 0
+        for article in news:
+            sentiment = simpleSentimentAnalyzer(headline)
+
+            if(sentiment=="positive"):
+                totalSentiment+=1
+            elif(sentiment=="negative"):
+                totalSentiment+=-1
+
+        self.currentSentiment = totalSentiment/len(news)
+
+    def getSentiment(self):
+        return self.currentSentiment
+
     def update(self):
         self.dayIndex+=1
+        self.updateSentiment()
         self.currentPrice = txtFile[self.dayIndex].split(",")[1]
+
+    def getNews(self):
+        return ["Help"]
 
 
 
