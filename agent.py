@@ -4,11 +4,12 @@ import abc
 from natural_language_processing import *
 
 class Agent:
-    def __init__(self, m):
+    def __init__(self,m):
         self.market = m #the market
-        self.ownedPosition = None #this will typically be an object of the
-                                  #positon that the agent is currently holding
-        self.numHoldings = 0 #how many holdings the agent has at a given position
+
+        self.ownedPosition = None #this will typically be an object of the positon that the agent is currently holding
+        self.numHoldings = 0 #how many holdings the agent has of a given position
+
         self.cash = 100  #how much our agent has to spend
         self.decisionMaker = LinearSarsaLearner(1, 1, .1, .1, 1) ##numFeatures, numActions, alpha, epsilon, gamma
         self.analyzer = Sentiment()
@@ -95,7 +96,9 @@ class LinearSarsaLearner:
 
         #randomly pick from greedy actions
         greedyAction = random.choice(greedyActions)
+
         return greedyAction
+
 
     def learningStep(self, activeFeatures, action, reward, nextFeatures):
         '''Performs a gradient descent SARSA learning step based on the given transition.'''
