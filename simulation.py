@@ -1,6 +1,7 @@
 import agent
 import market
 import sys
+import news
 
 def main():
     filename = sys.argv[1]
@@ -19,5 +20,10 @@ def main():
     testSentence = "I hate everything, it all sucks"
     res = localAgent.analyzeHeadline(testSentence)
     print("Sentence: ", testSentence, "\tSentiment: ", res)
+
+    #news testing
+    myNews = news.News()
+    print(myNews.getHeadlines("Microsoft", 5, "2018-10-14", "2018-10-21"))
+
 
 main()

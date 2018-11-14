@@ -11,6 +11,7 @@ class Agent:
         self.numHoldings = 0 #how many holdings the agent has at a given position
         self.cash = 100  #how much our agent has to spend
         self.decisionMaker = LinearSarsaLearner(1, 1, .1, .1, 1) ##numFeatures, numActions, alpha, epsilon, gamma
+        self.analyzer = Sentiment()
 
     def update(self):
         '''This will go through the process of a new day in the market'''
@@ -41,7 +42,7 @@ class Agent:
 
     def analyzeHeadline(self, headline):
         '''Analyze a string (headline) and return whether it is positive, negative or neutral.'''
-        return simpleSentimentAnalyzer(headline)
+        return self.analyzer.runSimpleAnalysis(headline)
 
 class LinearSarsaLearner:
     '''Represents an agent using SARSA with linear value function approximation, assuming binary features.'''
