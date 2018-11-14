@@ -17,7 +17,7 @@ def main():
     localMarket = market.Market(data)
     localAgent = agent.Agent(localMarket)
 
-    agent.update()
+    localAgent.update()
 
 def testStuff():
     testSentence = "I hate everything, it all sucks"

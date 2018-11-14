@@ -36,9 +36,9 @@ class Agent:
     def buyPosition(self, newPosition):
         "complete transaction of position, for now sell all of old position to buy max of new (assuming partial shares avaiable)"
         if(self.ownedPosition!=None):
-            self.cash = self.ownedPosition[0].getCurrentPrice()*self.ownedPosition[1]
+            self.cash = self.ownedPosition[0].getCurrentPrice() * self.ownedPosition[1]
 
-        self.numHoldings = self.cash/newPosition.getCurrentPrice()
+        self.numHoldings = self.cash / float(newPosition.getCurrentPrice())
         self.ownedPosition = newPosition
 
     def analyzeHeadline(self, headline):
