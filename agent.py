@@ -4,12 +4,12 @@ import abc
 
 
 class Agent:
-    def __init__(self, m):
+    def __init__(self,m):
         self.market = m #the market
 
         self.ownedPosition = None #this will typically be an object of the positon that the agent is currently holding
         self.numHoldings = 0 #how many holdings the agent has of a given position
-
+        
         self.cash = 100  #how much our agent has to spend
 
         self.decisionMaker = LinearSarsaLearner(1,1,.1,.1,1) ##numFeatures, numActions, alpha, epsilon, gamma
@@ -33,11 +33,17 @@ class Agent:
 
     def buyPosition(self,newPosition):
         "complete transaction of position, for now sell all of old position to buy max of new (assuming partial shares avaiable)"
-        if(self.ownedPosition!=None):
+        if(self.ownedPosition!=None): 
             self.cash = self.ownedPosition[0].getCurrentPrice()*self.ownedPosition[1]
-
+        
         self.numHoldings = self.cash/newPosition.getCurrentPrice()
         self.ownedPosition = newPosition
+
+        
+
+
+
+
 
 class LinearSarsaLearner:
     '''Represents an agent using SARSA with linear value function approximation, assuming binary features.'''
@@ -89,7 +95,9 @@ class LinearSarsaLearner:
                 greedyActions.append(action)
 
         greedyAction = random.choice(greedyActions)
+
         return greedyAction
+
 
     def learningStep(self, activeFeatures, action, reward, nextFeatures):
         '''Performs a gradient descent SARSA learning step based on the given transition.'''
