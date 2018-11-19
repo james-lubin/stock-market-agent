@@ -4,12 +4,11 @@ import news
 
 class Market:
     def __init__(self, p):
-        positionNames =p
+        positionNames = p
         print("\\n")
-        self.positions = self.createMarket(p)
+        self.positionTable = {}
+        self.positions = self.createMarket(p) #a list of positions
         self.numFeatures = 1
-        ##positions should be a list of positions
-
         self.day = 0
 
     def createMarket(self,data):
@@ -27,7 +26,9 @@ class Market:
         for line in data:
             #positionName = line[0]
             file = line.replace("\n","")
-            p.append(Position(file))
+            newPosition = Position(file)
+            p.append(newPosition)
+            self.positionTable[newPosition.getTicker()] = newPosition
             '''
             for i in range(1,numFeatures+1):
                 feature = line[i]
@@ -40,25 +41,27 @@ class Market:
     def getPositions(self):
         return self.positions
 
-    def getPosition(self,index):
+    def getPosition(self, index):
         return self.positions[index]
+
+    def getPositionByTicker(self, ticker):
+        return self.positionTable[ticker]
 
     def updateMarket(self):
         '''Increment the day and now use the data from the newest day'''
         for i in range(len(self.positions)):
             self.positions[i].update() #update position's features
 
-        return 0
-
 
 class Position:
-    def __init__(self,file):
+    def __init__(self, file):
         self.fileName = file
         #print(os.path.join(os.path.abspath(__file__), "\\Data\\Stocks\\"+self.fileName))
         self.pTag = file.split(".")[0] #TODO: change more descriptive name
-        print(os.path.abspath(__file__)+"\\Data\\Stocks\\"+self.fileName)
-        self.txtFile = open("Data\\Stocks\\"+self.fileName+".txt","r")
+        print(os.path.abspath(__file__) + "\\Data\\Stocks\\" + self.fileName)
+        self.txtFile = open("Data\\Stocks\\" + self.fileName + ".txt", "r")
         self.txtList = self.txtFile.readlines()
+        self.ticker = self.fileName.split(".")[0] #split off the .us that follows all the ticker names
 
         self.dayIndex = 0
         self.currentSentiment = 0
@@ -67,18 +70,21 @@ class Position:
 
         line  = self.txtList[self.dayIndex]
         date = line.split(",")[0]
-        while(line!="2015-01-27"):
+        while(line != "2015-01-27"):
             self.dayIndex+=1
             line = self.txtList[self.dayIndex]
             #print(line)
             line = line.split(",")[0]
 
         #print(positionData[1])
-        self.currentPrice = self.txtList[self.dayIndex].split(",")[1]
-        '''we will need to add a list of more features'''
+        self.currentPrice = float(self.txtList[self.dayIndex].split(",")[1])
+        #TODO:add a list of more features'''
 
     def getCurrentPrice(self):
         return self.currentPrice
+
+    def getTicker(self):
+        return self.ticker
 
     def updateSentiment(self):
         news = self.getNews() #returns a list of string of current relevent news articles
@@ -86,10 +92,10 @@ class Position:
         for article in news:
             sentiment = "Y" #simpleSentimentAnalyzer(headline)
 
-            if(sentiment=="positive"):
-                totalSentiment+=1
-            elif(sentiment=="negative"):
-                totalSentiment+=-1
+            if(sentiment == "positive"):
+                totalSentiment += 1
+            elif(sentiment == "negative"):
+                totalSentiment += -1
 
         self.currentSentiment = totalSentiment/len(news)
 
@@ -97,9 +103,9 @@ class Position:
         return self.currentSentiment
 
     def update(self):
-        self.dayIndex+=1
+        self.dayIndex += 1
         self.updateSentiment()
-        self.currentPrice = self.txtList[self.dayIndex].split(",")[1]
+        self.currentPrice = float(self.txtList[self.dayIndex].split(",")[1])
 
     def getNews(self):
         #TODO: makre variables more readable
