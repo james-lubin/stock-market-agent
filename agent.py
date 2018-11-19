@@ -4,20 +4,26 @@ import abc
 from natural_language_processing import *
 
 class Agent:
-    def __init__(self,m):
+    def __init__(self, m):
         self.market = m #the market
 
-        self.ownedPosition = None #this will typically be an object of the positon that the agent is currently holding
+        self.ownedPositions = [] #a list of positons that the agent is currently holding
         self.numHoldings = 0 #how many holdings the agent has of a given position
+        self.latestReward = 0
 
         self.cash = 100  #how much our agent has to spend
+        self.deltaValue = 0
         self.decisionMaker = LinearSarsaLearner(1, 1, .1, .1, 1) ##numFeatures, numActions, alpha, epsilon, gamma
         self.analyzer = Sentiment()
 
     def update(self):
         '''This will go through the process of a new day in the market'''
+        previousWorth = self.calculateHoldingsWorth(self.ownedPositions)
         self.market.updateMarket() #first update the market to the new day
         self.makeChoice()
+        currentWorth = self.calculateHoldingsWorth(self.ownedPositions)
+        self.latestReward = currentWorth - previousWorth
+        print("Reward: ", self.latestReward)
         '''make a choice using sarsa and the binary features
                           that we choose. The choice should be between swapping
                           positions or choosing to not hold any'''
@@ -35,15 +41,29 @@ class Agent:
 
     def buyPosition(self, newPosition):
         "complete transaction of position, for now sell all of old position to buy max of new (assuming partial shares avaiable)"
-        if(self.ownedPosition!=None):
-            self.cash = self.ownedPosition[0].getCurrentPrice() * self.ownedPosition[1]
+        for pos in self.ownedPositions:
+            self.cash += pos.getCurrentPrice()
 
         self.numHoldings = self.cash / float(newPosition.getCurrentPrice())
-        self.ownedPosition = newPosition
+        self.cash = 0
+        self.ownedPositions.append(newPosition)
 
     def analyzeHeadline(self, headline):
         '''Analyze a string (headline) and return whether it is positive, negative or neutral.'''
         return self.analyzer.runSimpleAnalysis(headline)
+
+    def getReward(self, previousWorth, currentWorth):
+        '''Get the reward for the latest day'''
+        return self.latestReward
+
+    def calculateHoldingsWorth(self, positions):
+        '''Calculate the worth of the agent's positions according to the market'''
+        worth = self.cash
+        for pos in positions:
+            #get the updated position and then add it's price to worth
+            worth += self.market.getPositionByTicker(pos.getTicker()).getCurrentPrice()
+
+        return worth
 
 class LinearSarsaLearner:
     '''Represents an agent using SARSA with linear value function approximation, assuming binary features.'''
