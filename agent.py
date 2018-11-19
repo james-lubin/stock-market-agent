@@ -43,6 +43,7 @@ class Agent:
         "complete transaction of position, for now sell all of old position to buy max of new (assuming partial shares avaiable)"
         for pos in self.ownedPositions:
             self.cash += pos.getCurrentPrice()
+        self.ownedPositions = []
 
         self.numHoldings = self.cash / float(newPosition.getCurrentPrice())
         self.cash = 0
@@ -61,7 +62,7 @@ class Agent:
         worth = self.cash
         for pos in positions:
             #get the updated position and then add it's price to worth
-            worth += self.market.getPositionByTicker(pos.getTicker()).getCurrentPrice()
+            worth += self.market.getPositionByTicker(pos.getTicker()).getCurrentPrice() * self.numHoldings
 
         return worth
 
