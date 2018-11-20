@@ -1,4 +1,3 @@
-mmm.us
 axp.us
 aapl.us
 ba.us
@@ -17,14 +16,14 @@ intc.us
 jnj.us
 jpm.us
 mcd.us
-mrk.us
 msft.us
 nke.us
 pfe.us
 pg.us
-trv.us
 utx.us
 unh.us
 vz.us
 v.us
+mrk.us
+trv.us
 wmt.us

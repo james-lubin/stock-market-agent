@@ -18,8 +18,9 @@ class Agent:
         self.analyzer = Sentiment()
         self.lastAction = 0
         self.yesterdayValue = 0
+        self.market.updateMarket()
 
-    def update(self,learning):
+    def update(self, learning):
         '''This will go through the process of a new day in the market'''
         previousWorth = self.calculateHoldingsWorth(self.ownedPositions)
          #first update the market to the new day
@@ -43,7 +44,7 @@ class Agent:
         '''self.updateValues() we cannot choose actions and update values based on
         rewards we will have to figure out how to do this'''
         marketReward = self.evaluate()# evaluate performace of agent, this is issue for much longer down road
-        return self.latestReward, marketReward/3
+        return self.latestReward, marketReward/30
 
     def getQVal(self):
         return self.decisionMaker.getQVal()
@@ -92,14 +93,15 @@ class Agent:
 
     def evaluate(self):
         positions = self.market.getPositions()
-        i =0
+        i = 0
+        avgValue = 0
         for pos in positions:
-            avgValue  = pos.getCurrentPrice()
-            i+=1
+            avgValue += pos.getCurrentPrice()
+            i += 1
 
-        dif = avgValue - self.yesterdayValue
+        diff = avgValue - self.yesterdayValue
         self.yesterdayValue = avgValue
-        return dif
+        return diff
 
 
 class LinearSarsaLearner:
