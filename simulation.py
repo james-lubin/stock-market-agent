@@ -12,7 +12,8 @@ def main():
 
     lines = txtFile.readlines()
 
-    #for line in lines: read files if need be,  currently data needs to be in the format of a list of lines where each line is a new day (see example trainingset)
+    #for line in lines: read files if need be,  currently data needs to be in
+    #the format of a list of lines where each line is a new day (see example trainingset)
 
     data = lines
     localMarket = market.Market(data)
