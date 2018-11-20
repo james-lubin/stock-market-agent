@@ -1,50 +1,114 @@
 import random
 from tilefeatures import *
 import abc
-
+from natural_language_processing import *
 
 class Agent:
     def __init__(self, m):
         self.market = m #the market
 
-        self.ownedPosition = None #this will typically be an object of the positon that the agent is currently holding
+        self.ownedPositions = [] #a list of positons that the agent is currently holding
         self.numHoldings = 0 #how many holdings the agent has of a given position
+        self.latestReward = 0
 
         self.cash = 100  #how much our agent has to spend
+        self.deltaValue = 0
+        self.decisionMaker = LinearSarsaLearner(3, len(self.market.getPositions()), .1, .1, .9) ##numFeatures, numActions, alpha, epsilon, gamma
 
-        self.decisionMaker = LinearSarsaLearner(1,1,.1,.1,1) ##numFeatures, numActions, alpha, epsilon, gamma
+        self.analyzer = Sentiment()
+        self.lastAction = 0
+        self.yesterdayValue = 0
 
-    def update(self):
+    def update(self,learning):
         '''This will go through the process of a new day in the market'''
-        self.market.updateMarket() #first update the market to the new day
+        previousWorth = self.calculateHoldingsWorth(self.ownedPositions)
+         #first update the market to the new day
+        activeFeatures = self.market.getActiveFeatures()
+        nextAction = self.makeChoice(activeFeatures,learning)
+        self.market.updateMarket()
 
-        self.makeChoice() #make a choice using sarsa and the binary features that we choose. The choice should be between swapping positions or choosing to not hold any
 
-        #self.updateValues() we cannot choose actions and update values based on rewards we will have to figure out how to do this
+        nextFeatures = self.market.getActiveFeatures()
+        currentWorth = self.calculateHoldingsWorth(self.ownedPositions)
+        self.latestReward = currentWorth - previousWorth
 
-        #self.evaluate() evaluate performace of agent, this is issue for much longer down road
+        self.decisionMaker.updateReward(self.latestReward,nextAction,self.lastAction,activeFeatures,nextFeatures)
+        self.lastAction = nextAction
 
-    def makeChoice(self):
+        #print("Reward: ", self.latestReward)
+        '''make a choice using sarsa and the binary features
+                          that we choose. The choice should be between swapping
+                          positions or choosing to not hold any'''
+
+        '''self.updateValues() we cannot choose actions and update values based on
+        rewards we will have to figure out how to do this'''
+        marketReward = self.evaluate()# evaluate performace of agent, this is issue for much longer down road
+        return self.latestReward, marketReward/3
+
+    def getQVal(self):
+        return self.decisionMaker.getQVal()
+
+    def makeChoice(self,activeFeatures,learning):
         "Make a decision using LinearSarsa then buy position"
-
-        #position = self.decisionMaker.learningStep(activeFeatures, action, reward, nextFeatures)
-        position = self.market.getPosition(0)
+        if(learning):
+            position = self.decisionMaker.epsilonGreedy(activeFeatures)
+        else:
+            position = self.decisionMaker.greedy(activeFeatures)
+        #position = self.market.getPosition(0)
         self.buyPosition(position)
+        print("Buying position: ", self.market.getPosition(position).getTicker(), " at price: ",  self.market.getPosition(position).getCurrentPrice())
+        return position
 
-    def buyPosition(self,newPosition):
+    def buyPosition(self, newPosition):
         "complete transaction of position, for now sell all of old position to buy max of new (assuming partial shares avaiable)"
-        if(self.ownedPosition!=None):
-            self.cash = self.ownedPosition[0].getCurrentPrice()*self.ownedPosition[1]
+        #for pos in self.ownedPositions:
+        if(len(self.ownedPositions) >= 1):
+            self.cash = self.ownedPositions[0].getCurrentPrice()*self.numHoldings
+        #self.ownedPositions = []
 
-        self.numHoldings = self.cash/newPosition.getCurrentPrice()
-        self.ownedPosition = newPosition
+        actualPosition = self.market.getPosition(newPosition)
+        self.numHoldings = self.cash / float(actualPosition.getCurrentPrice())
+        self.cash = 0
+        self.ownedPositions = [actualPosition]
+
+    def analyzeHeadline(self, headline):
+        '''Analyze a string (headline) and return whether it is positive, negative or neutral.'''
+        return self.analyzer.runSimpleAnalysis(headline)
+
+    def getReward(self, previousWorth, currentWorth):
+        '''Get the reward for the latest day'''
+        return self.latestReward
+
+    def calculateHoldingsWorth(self, positions):
+        '''Calculate the worth of the agent's positions according to the market'''
+        worth = 0
+        #get the updated position and then add it's price to worth
+        if(len(positions)==1):
+            worth += self.market.getPositionByTicker(positions[0].getTicker()).getCurrentPrice() * self.numHoldings
+        else:
+            worth+= self.cash
+
+        return worth
+
+    def evaluate(self):
+        positions = self.market.getPositions()
+        i =0
+        for pos in positions:
+            avgValue  = pos.getCurrentPrice()
+            i+=1
+
+        dif = avgValue - self.yesterdayValue
+        self.yesterdayValue = avgValue
+        return dif
+
 
 class LinearSarsaLearner:
     '''Represents an agent using SARSA with linear value function approximation, assuming binary features.'''
     def __init__(self, numFeatures, numActions, alpha, epsilon, gamma):
-        '''The constructor takes the number of features and actions as well as the step size (alpha), the exploration rate (epsilon), the discount
+        '''The constructor takes the number of features and actions as well as
+        the step size (alpha), the exploration rate (epsilon), the discount
         factor (gamma).'''
-        self.theta = [] #theta represent the weights of the Q function. It is indexed first by action, then by feature index
+        self.theta = [] #theta represents the weights of the Q function. It is indexed first by action, then by feature index
         for a in range(numActions):
             self.theta.append([0]*numFeatures)
 
@@ -59,7 +123,8 @@ class LinearSarsaLearner:
         '''Calculates the approximate Q-value of a state-action pair. It takes a list of indices of active features (feature value is 1) and the
         action.'''
         q = 0
-        for feature in activeFeatures:
+
+        for feature in activeFeatures[action]:
             q += self.theta[action][feature]
         return q
 
@@ -78,26 +143,32 @@ class LinearSarsaLearner:
         maxQ = self.getQValue(activeFeatures, 0)
         greedyActions = [0]
         greedyAction = 0
-        for i in range (1,self.numActions):
+        for i in range (1, self.numActions):
             action = i
             curQ = self.getQValue(activeFeatures, action)
             if curQ > maxQ:
                 curQ = maxQ
                 greedyActions = [action]
             elif curQ == maxQ:
-                #flip a coin on whether we update the max in order to maintain the randomness property
                 greedyActions.append(action)
 
+        #randomly pick from greedy actions
         greedyAction = random.choice(greedyActions)
+
         return greedyAction
 
+    '''
     def learningStep(self, activeFeatures, action, reward, nextFeatures):
-        '''Performs a gradient descent SARSA learning step based on the given transition.'''
+        Performs a gradient descent SARSA learning step based on the given transition.
         nextAction = self.epsilonGreedy(activeFeatures)
-        delta = reward + (self.gamma * self.getQValue(nextFeatures, nextAction)) - self.getQValue(activeFeatures, action)
-        for feature in activeFeatures:
-            self.theta[action][feature] += self.alpha * delta
         return nextAction
+    '''
+
+    def updateReward(self, reward, nextAction,action,activeFeatures,nextFeatures):
+        delta = reward + (self.gamma * self.getQValue(nextFeatures, nextAction)) - self.getQValue(activeFeatures, action)
+        for feature in activeFeatures[action]:
+            self.theta[action][feature] += self.alpha * delta
+
 
     def terminalStep(self, activeFeatures, action, reward):
         '''Performs the last learning step of an episode. Because the episode has terminated, the next Q-value is 0.'''
@@ -106,3 +177,6 @@ class LinearSarsaLearner:
         for feature in activeFeatures:
             self.theta[action][feature] += self.alpha * delta
         return nextAction
+
+    def getQVal(self):
+        return self.theta
