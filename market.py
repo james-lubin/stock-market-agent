@@ -10,7 +10,6 @@ class Market:
         self.positions = self.createMarket(p) #a list of positions
         self.numFeatures = 1
         self.day = 0
-<<<<<<< HEAD
         self.activeFeatures = []
 
     def createMarket(self,data):
@@ -21,33 +20,6 @@ class Market:
             newPosition = Position(file)
             p.append(newPosition)
             self.positionTable[newPosition.getTicker()] = newPosition
-=======
-
-    def createMarket(self,data):
-        p = []
-        #line = data[0]
-        #line = line[0:-1].split("\t")
-        '''
-        print(line)
-        for i in range(0,len(line),2):
-            name = line[i]
-            currentPrice = line[i+1]
-
-            p.append(Position([name,currentPrice]))
-        '''
-        for line in data:
-            #positionName = line[0]
-            file = line.replace("\n","")
-            newPosition = Position(file)
-            p.append(newPosition)
-            self.positionTable[newPosition.getTicker()] = newPosition
-            '''
-            for i in range(1,numFeatures+1):
-                feature = line[i]
-                p[positionName].append(feature)
-            '''
-
->>>>>>> master
 
         return p
 
@@ -62,15 +34,10 @@ class Market:
 
     def updateMarket(self):
         '''Increment the day and now use the data from the newest day'''
-<<<<<<< HEAD
         self.activeFeatures = []
         for i in range(len(self.positions)):
             self.positions[i].update() #update position's features
             self.activeFeatures.append(self.positions[i].getPositionActiveFeatures())
-=======
-        for i in range(len(self.positions)):
-            self.positions[i].update() #update position's features
->>>>>>> master
 
     def getActiveFeatures(self):
         return self.activeFeatures
@@ -89,7 +56,6 @@ class Position:
         self.currentSentiment = 0
         self.news = news.News()
 
-<<<<<<< HEAD
         line  = self.txtList[self.dayIndex]
         date = line.split(",")[0]
         self.last52 = []
@@ -111,20 +77,6 @@ class Position:
         self.last52Sum = sum(self.last52)
         self.last52Avg = self.last52Sum / 260
         self.currentPrice = float(self.txtList[self.dayIndex].split(",")[1])
-=======
-
-        line  = self.txtList[self.dayIndex]
-        date = line.split(",")[0]
-        while(line != "2015-01-27"):
-            self.dayIndex+=1
-            line = self.txtList[self.dayIndex]
-            #print(line)
-            line = line.split(",")[0]
-
-        #print(positionData[1])
-        self.currentPrice = float(self.txtList[self.dayIndex].split(",")[1])
-        #TODO:add a list of more features'''
->>>>>>> master
 
     def getCurrentPrice(self):
         return self.currentPrice
@@ -148,7 +100,6 @@ class Position:
     def getSentiment(self):
         return self.currentSentiment
 
-<<<<<<< HEAD
     def getPositionActiveFeatures(self):
         features = []
         if(self.below52Week()):
@@ -179,18 +130,11 @@ class Position:
         self.last52Avg = self.last52Sum / 260
         self.lastWeekSum = self.lastWeekSum - weeklyOldestDay + self.getCurrentPrice()
         self.lastWeekAvg = self.lastWeekSum / 5
-=======
-    def update(self):
-        self.dayIndex += 1
-        self.updateSentiment()
-        self.currentPrice = float(self.txtList[self.dayIndex].split(",")[1])
->>>>>>> master
 
     def getNews(self):
         #TODO: makre variables more readable
         #self.news.getHeadlines(self.pTag, 3, self.txtList[self.dayIndex - 7].split(",")[0], self.txtList[self.dayIndex].split(",")[0])
         return self.news.getHeadlines(self.pTag, 3, "2018-10-21", "2018-10-28")
-<<<<<<< HEAD
 
     def below52Week(self):
         if(self.last52Avg < self.currentPrice):
@@ -209,5 +153,3 @@ class Position:
             return True
         else:
             return False
-=======
->>>>>>> master
