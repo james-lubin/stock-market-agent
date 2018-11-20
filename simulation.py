@@ -23,9 +23,8 @@ def main():
     marketReward = 0
     for i in range(days):
         tReward, mReward = localAgent.update(True)
-        totalReward+=tReward
+        totalReward += tReward
         marketReward += mReward
-        print("Day: ", i)
 
     learningTotal, learningMarketReward = totalReward, marketReward
     print("Learning phase ended!------------------------------------------\n\n\n")
@@ -36,7 +35,6 @@ def main():
         tReward, mReward = localAgent.update(False)
         totalReward+=tReward
         marketReward += mReward
-        print("Day: ", i)
 
     print("Learning Phase: ", learningTotal, learningMarketReward)
     print("Learned Phase: ", totalReward, marketReward)
