@@ -5,7 +5,6 @@ import news
 class Market:
     def __init__(self, p):
         positionNames = p
-        print("\\n")
         self.positionTable = {}
         self.positions = self.createMarket(p) #a list of positions
         self.numFeatures = 1
@@ -45,12 +44,11 @@ class Market:
 class Position:
     def __init__(self, file):
         self.fileName = file
-        #print(os.path.join(os.path.abspath(__file__), "\\Data\\Stocks\\"+self.fileName))
         self.pTag = file.split(".")[0] #TODO: change more descriptive name
-        print(os.path.abspath(__file__) + "\\Data\\Stocks\\" + self.fileName)
         self.txtFile = open("Data\\Stocks\\" + self.fileName + ".txt", "r")
         self.txtList = self.txtFile.readlines()
         self.ticker = self.fileName.split(".")[0] #split off the .us that follows all the ticker names
+        self.startDate = "2012-01-03"
 
         self.dayIndex = 0
         self.currentSentiment = 0
@@ -60,7 +58,7 @@ class Position:
         date = line.split(",")[0]
         self.last52 = []
 
-        while(line!="2012-01-03"):
+        while(line != self.startDate):
             self.dayIndex += 1
             line = self.txtList[self.dayIndex]
             splitLine = line.split(",")
@@ -153,3 +151,6 @@ class Position:
             return True
         else:
             return False
+
+    def closeFile(self):
+        txtFile.close()
