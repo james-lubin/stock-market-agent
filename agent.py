@@ -17,10 +17,6 @@ class Agent:
         self.lastAction = 0
         self.yesterdayValue = 0
         self.market.updateMarket()
-<<<<<<< HEAD
-
-=======
->>>>>>> clean
 
     def update(self, learning):
         '''This will go through the process of a new day in the market'''
@@ -37,10 +33,6 @@ class Agent:
 
         self.decisionMaker.updateReward(self.latestReward,nextAction,self.lastAction,activeFeatures,nextFeatures)
         self.lastAction = nextAction
-<<<<<<< HEAD
-
-=======
->>>>>>> clean
 
         #print("Reward: ", self.latestReward)
         '''make a choice using sarsa and the binary features
@@ -63,10 +55,6 @@ class Agent:
             position = self.decisionMaker.greedy(activeFeatures)
         #position = self.market.getPosition(0)
         self.buyPosition(position)
-<<<<<<< HEAD
-        #print("Buying position: ", self.market.getPosition(position).getTicker(), " at price: ",  self.market.getPosition(position).getCurrentPrice())
-=======
->>>>>>> clean
         return position
 
     def buyPosition(self, newPosition):
@@ -84,15 +72,11 @@ class Agent:
         self.ownedPositions = [actualPosition]
         print("Bought ", self.numHoldings, "shares of ", actualPosition.getTicker(), " at price ", actualPosition.getCurrentPrice(), " each")
 
-<<<<<<< HEAD
-    def getReward(self, previousWorth, currentWorth):
-=======
     def analyzeHeadline(self, headline):
         '''Analyze a string (headline) and return whether it is positive, negative or neutral.'''
         return self.analyzer.runSimpleAnalysis(headline)
 
     def getReward(self):
->>>>>>> clean
         '''Get the reward for the latest day'''
         return self.latestReward
 
@@ -119,7 +103,6 @@ class Agent:
         self.yesterdayValue = avgValue
         return diff
 
-<<<<<<< HEAD
     def getAverages(self):
 
         positions = self.market.getPositions()
@@ -134,8 +117,6 @@ class Agent:
             i += 1
 
         return averages
-=======
->>>>>>> clean
 
 class LinearSarsaLearner:
     '''Represents an agent using SARSA with linear value function approximation, assuming binary features.'''

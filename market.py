@@ -3,10 +3,6 @@ import os
 class Market:
     def __init__(self, p):
         positionNames = p
-<<<<<<< HEAD
-        #print("\\n")
-=======
->>>>>>> clean
         self.positionTable = {}
         self.positions = self.createMarket(p) #a list of positions
         self.numFeatures = 1
@@ -15,36 +11,12 @@ class Market:
 
     def createMarket(self,data):
         p = []
-<<<<<<< HEAD
-        #line = data[0]
-        #line = line[0:-1].split("\t")
-        '''
-        print(line)
-        for i in range(0,len(line),2):
-            name = line[i]
-            currentPrice = line[i+1]
-
-            p.append(Position([name,currentPrice]))
-        '''
-        for line in data:
-            #positionName = line[0]
-            file = line.replace("\n","")
-            newPosition = Position(file)
-            p.append(newPosition)
-            self.positionTable[newPosition.getTicker()] = newPosition
-            '''
-            for i in range(1,numFeatures+1):
-                feature = line[i]
-                p[positionName].append(feature)
-            '''
-=======
         for line in data:
             #positionName = line[0]
             file = line.replace("\n", "")
             newPosition = Position(file)
             p.append(newPosition)
             self.positionTable[newPosition.getTicker()] = newPosition
->>>>>>> clean
 
         return p
 
@@ -71,10 +43,6 @@ class Position:
     def __init__(self, file):
         self.fileName = file
         self.pTag = file.split(".")[0] #TODO: change more descriptive name
-<<<<<<< HEAD
-        #print(os.path.abspath(__file__) + "\\Data\\Stocks\\" + self.fileName)
-=======
->>>>>>> clean
         self.txtFile = open("Data\\Stocks\\" + self.fileName + ".txt", "r")
         self.txtList = self.txtFile.readlines()
         self.ticker = self.fileName.split(".")[0] #split off the .us that follows all the ticker names
@@ -104,10 +72,6 @@ class Position:
         self.last52Sum = sum(self.last52)
         self.last52Avg = self.last52Sum / 260
         self.currentPrice = float(self.txtList[self.dayIndex].split(",")[1])
-<<<<<<< HEAD
-
-=======
->>>>>>> clean
 
     def getCurrentPrice(self):
         return self.currentPrice
@@ -161,19 +125,11 @@ class Position:
         self.last52Avg = self.last52Sum / 260
         self.lastWeekSum = self.lastWeekSum - weeklyOldestDay + self.getCurrentPrice()
         self.lastWeekAvg = self.lastWeekSum / 5
-<<<<<<< HEAD
-
-=======
->>>>>>> clean
 
     def getNews(self):
         #TODO: makre variables more readable
         #self.news.getHeadlines(self.pTag, 3, self.txtList[self.dayIndex - 7].split(",")[0], self.txtList[self.dayIndex].split(",")[0])
-<<<<<<< HEAD
-        return 0
-=======
         return self.news.getHeadlines(self.pTag, 3, "2018-10-21", "2018-10-28")
->>>>>>> clean
 
     def below52Week(self):
         if(self.last52Avg < self.currentPrice):
@@ -193,8 +149,5 @@ class Position:
         else:
             return False
 
-<<<<<<< HEAD
-=======
     def closeFile(self):
         txtFile.close()
->>>>>>> clean
