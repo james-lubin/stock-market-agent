@@ -1,7 +1,6 @@
 import random
 from tilefeatures import *
 import abc
-from natural_language_processing import *
 
 class Agent:
     def __init__(self, m):
@@ -13,22 +12,16 @@ class Agent:
 
         self.cash = 100  #how much our agent has to spend
         self.deltaValue = 0
-<<<<<<< HEAD
         self.decisionMaker = LinearSarsaLearner(3, len(self.market.getPositions()), .1, .1, .9) ##numFeatures, numActions, alpha, epsilon, gamma
 
-        self.analyzer = Sentiment()
         self.lastAction = 0
         self.yesterdayValue = 0
         self.market.updateMarket()
-=======
-        self.decisionMaker = LinearSarsaLearner(1, 1, .1, .1, 1) ##numFeatures, numActions, alpha, epsilon, gamma
-        self.analyzer = Sentiment()
->>>>>>> master
+
 
     def update(self, learning):
         '''This will go through the process of a new day in the market'''
         previousWorth = self.calculateHoldingsWorth(self.ownedPositions)
-<<<<<<< HEAD
          #first update the market to the new day
         activeFeatures = self.market.getActiveFeatures()
         nextAction = self.makeChoice(activeFeatures,learning)
@@ -41,20 +34,7 @@ class Agent:
 
         self.decisionMaker.updateReward(self.latestReward,nextAction,self.lastAction,activeFeatures,nextFeatures)
         self.lastAction = nextAction
-=======
-        self.market.updateMarket() #first update the market to the new day
-        self.makeChoice()
-        currentWorth = self.calculateHoldingsWorth(self.ownedPositions)
-        self.latestReward = currentWorth - previousWorth
-        print("Reward: ", self.latestReward)
-        '''make a choice using sarsa and the binary features
-                          that we choose. The choice should be between swapping
-                          positions or choosing to not hold any'''
 
-        '''self.updateValues() we cannot choose actions and update values based on
-        rewards we will have to figure out how to do this'''
-        #self.evaluate() evaluate performace of agent, this is issue for much longer down road
->>>>>>> master
 
         #print("Reward: ", self.latestReward)
         '''make a choice using sarsa and the binary features
@@ -77,12 +57,11 @@ class Agent:
             position = self.decisionMaker.greedy(activeFeatures)
         #position = self.market.getPosition(0)
         self.buyPosition(position)
-        print("Buying position: ", self.market.getPosition(position).getTicker(), " at price: ",  self.market.getPosition(position).getCurrentPrice())
+        #print("Buying position: ", self.market.getPosition(position).getTicker(), " at price: ",  self.market.getPosition(position).getCurrentPrice())
         return position
 
     def buyPosition(self, newPosition):
         "complete transaction of position, for now sell all of old position to buy max of new (assuming partial shares avaiable)"
-<<<<<<< HEAD
         #for pos in self.ownedPositions:
         if(len(self.ownedPositions) >= 1):
             self.cash = self.ownedPositions[0].getCurrentPrice()*self.numHoldings
@@ -92,10 +71,6 @@ class Agent:
         self.numHoldings = self.cash / float(actualPosition.getCurrentPrice())
         self.cash = 0
         self.ownedPositions = [actualPosition]
-
-    def analyzeHeadline(self, headline):
-        '''Analyze a string (headline) and return whether it is positive, negative or neutral.'''
-        return self.analyzer.runSimpleAnalysis(headline)
 
     def getReward(self, previousWorth, currentWorth):
         '''Get the reward for the latest day'''
@@ -124,32 +99,20 @@ class Agent:
         self.yesterdayValue = avgValue
         return diff
 
-=======
-        for pos in self.ownedPositions:
-            self.cash += pos.getCurrentPrice()
-        self.ownedPositions = []
+    def getAverages(self):
 
-        self.numHoldings = self.cash / float(newPosition.getCurrentPrice())
-        self.cash = 0
-        self.ownedPositions.append(newPosition)
+        positions = self.market.getPositions()
 
-    def analyzeHeadline(self, headline):
-        '''Analyze a string (headline) and return whether it is positive, negative or neutral.'''
-        return self.analyzer.runSimpleAnalysis(headline)
-
-    def getReward(self, previousWorth, currentWorth):
-        '''Get the reward for the latest day'''
-        return self.latestReward
-
-    def calculateHoldingsWorth(self, positions):
-        '''Calculate the worth of the agent's positions according to the market'''
-        worth = self.cash
+        averages = []
+        i = 0
+        avgValue = 0
         for pos in positions:
-            #get the updated position and then add it's price to worth
-            worth += self.market.getPositionByTicker(pos.getTicker()).getCurrentPrice() * self.numHoldings
+            avgValue = pos.getCurrentPrice()
+            #print(pos.getTicker())
+            averages.append(avgValue)
+            i += 1
 
-        return worth
->>>>>>> master
+        return averages
 
 class LinearSarsaLearner:
     '''Represents an agent using SARSA with linear value function approximation, assuming binary features.'''
@@ -206,7 +169,6 @@ class LinearSarsaLearner:
 
         return greedyAction
 
-<<<<<<< HEAD
     '''
 =======
 

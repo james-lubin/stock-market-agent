@@ -1,7 +1,6 @@
 import agent
 import market
 import sys
-import news
 
 def main():
 
@@ -16,39 +15,50 @@ def main():
     #the format of a list of lines where each line is a new day (see example trainingset)
 
     data = lines
-    localMarket = market.Market(data)
-    localAgent = agent.Agent(localMarket)
 
-    totalReward = 0
-    marketReward = 0
-    for i in range(days):
-        tReward, mReward = localAgent.update(True)
-        totalReward+=tReward
-        marketReward += mReward
-        print("Day: ", i)
+    for j in range(10):
+        localMarket = market.Market(data)
+        localAgent = agent.Agent(localMarket)
 
-    learningTotal, learningMarketReward = totalReward, marketReward
-    print("Learning phase ended!------------------------------------------\n\n\n")
 
-    totalReward = 0
-    marketReward = 0
-    for i in range(days):
-        tReward, mReward = localAgent.update(False)
-        totalReward+=tReward
-        marketReward += mReward
-        print("Day: ", i)
+        totalReward = 0
+        marketReward = 0
+        startAverages = localAgent.getAverages()
+        for i in range(days):
+            tReward, mReward = localAgent.update(True)
+            totalReward+=tReward
+            marketReward += mReward
+            #print("Day: ", i)
+        endAverages = localAgent.getAverages()
+        #print(startAverages)
 
-    print("Learning Phase: ", learningTotal, learningMarketReward)
-    print("Learned Phase: ", totalReward, marketReward)
-    print(localAgent.getQVal())
+        #print(endAverages)
+        learningTotal, learningMarketReward = totalReward, marketReward
+        #print("Learning phase ended!------------------------------------------\n\n\n")
 
-def testStuff():
-    testSentence = "I hate everything, it all sucks"
-    res = localAgent.analyzeHeadline(testSentence)
-    print("Sentence: ", testSentence, "\tSentiment: ", res)
+        totalReward = 0
+        marketReward = 0
+        start1Averages = localAgent.getAverages()
+        for i in range(days):
+            tReward, mReward = localAgent.update(False)
+            totalReward+=tReward
+            marketReward += mReward
+            #print("Day: ", i)
+        end1Averages = localAgent.getAverages()
 
-    #news testing
-    myNews = news.News()
-    print(myNews.getHeadlines("Microsoft", 5, "2018-10-14", "2018-10-21"))
+        learningAverages = []
+        learnedAverages = []
+        for i in range(len(startAverages)):
+            learningAverages.append((endAverages[i]-startAverages[i])/startAverages[i])
+            learnedAverages.append((end1Averages[i]-start1Averages[i])/start1Averages[i])
+
+        #print(learningAverages)
+        marketAverage = sum(learningAverages)/len(learningAverages)
+        marketAverage1=  sum(learnedAverages)/len(learnedAverages)
+
+        print("Learnin Phase: "+ ","+str(learningTotal)+"," +str(marketAverage*100))
+        print("Learned Phase: "+","+str(totalReward)+","+ str(marketAverage1*100)+"\n")
+        #print(localAgent.getQVal())
+
 
 main()
