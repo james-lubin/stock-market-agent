@@ -57,7 +57,6 @@ class Agent:
             position = self.decisionMaker.greedy(activeFeatures)
         #position = self.market.getPosition(0)
         self.buyPosition(position)
-        print("Buying position: ", self.market.getPosition(position).getTicker(), " at price: ",  self.market.getPosition(position).getCurrentPrice())
         return position
 
     def buyPosition(self, newPosition):
@@ -65,18 +64,21 @@ class Agent:
         #for pos in self.ownedPositions:
         if(len(self.ownedPositions) >= 1):
             self.cash = self.ownedPositions[0].getCurrentPrice()*self.numHoldings
-        #self.ownedPositions = []
+            print("Sold   ", self.numHoldings, "shares of ", self.ownedPositions[0].getTicker(), " at price ", self.ownedPositions[0].getCurrentPrice(), " each")
+        else:
+            print("Cash: ", self.cash)
 
         actualPosition = self.market.getPosition(newPosition)
         self.numHoldings = self.cash / float(actualPosition.getCurrentPrice())
         self.cash = 0
         self.ownedPositions = [actualPosition]
+        print("Bought ", self.numHoldings, "shares of ", actualPosition.getTicker(), " at price ", actualPosition.getCurrentPrice(), " each")
 
     def analyzeHeadline(self, headline):
         '''Analyze a string (headline) and return whether it is positive, negative or neutral.'''
         return self.analyzer.runSimpleAnalysis(headline)
 
-    def getReward(self, previousWorth, currentWorth):
+    def getReward(self):
         '''Get the reward for the latest day'''
         return self.latestReward
 
