@@ -20,24 +20,38 @@ def main():
 
     totalReward = 0
     marketReward = 0
+
+    startAverages = localAgent.getAverages()
     for i in range(days):
         tReward, mReward = localAgent.update(True)
         totalReward += tReward
         marketReward += mReward
+    endAverages = localAgent.getAverages()
 
     learningTotal, learningMarketReward = totalReward, marketReward
     print("Learning phase ended!------------------------------------------\n\n\n")
 
     totalReward = 0
     marketReward = 0
+    secStartAverages = localAgent.getAverages()
     for i in range(days):
         tReward, mReward = localAgent.update(False)
-        totalReward+=tReward
+        totalReward += tReward
         marketReward += mReward
+    secEndAverages = localAgent.getAverages()
 
-    print("Learning Phase: ", learningTotal, learningMarketReward)
-    print("Learned Phase: ", totalReward, marketReward)
-    print(localAgent.getQVal())
+    learningAverages = []
+    learnedAverages = []
+    for i in range(len(startAverages)):
+        learningAverages.append((endAverages[i] - startAverages[i]) / startAverages[i])
+        learnedAverages.append((secEndAverages[i] - secStartAverages[i]) / secStartAverages[i])
+
+    marketAverage = sum(learningAverages) / len(learningAverages)
+    secMarketAvg = sum(learnedAverages) / len(learnedAverages)
+
+    print("\n\n\n---Averages---  ", "Agent", "\t\t\t", "Market")
+    print("Learning Phase: ", learningTotal, "\t", (marketAverage * 100))
+    print("Learned  Phase: ", totalReward, "\t", (secMarketAvg * 100), "\n")
 
 def testStuff():
     testSentence = "I hate everything, it all sucks"
