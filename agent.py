@@ -14,6 +14,9 @@ class Agent:
         self.deltaValue = 0
         self.decisionMaker = LinearSarsaLearner(3, len(self.market.getPositions()), .1, .1, .9) ##numFeatures, numActions, alpha, epsilon, gamma
 
+        self.rewardFile = open("NormalizedRewards.txt", "w")
+        self.rewardFileNoLearn = open("NormalizedRewardsNoL.txt", "w")
+
         self.lastAction = 0
         self.yesterdayValue = 0
         self.market.updateMarket()
@@ -31,7 +34,7 @@ class Agent:
         currentWorth = self.calculateHoldingsWorth(self.ownedPositions)
         self.latestReward = currentWorth - previousWorth
 
-        self.decisionMaker.updateReward(self.latestReward,nextAction,self.lastAction,activeFeatures,nextFeatures)
+        self.decisionMaker.updateReward(self.latestReward, nextAction, self.lastAction, activeFeatures, nextFeatures)
         self.lastAction = nextAction
 
         #print("Reward: ", self.latestReward)
@@ -41,8 +44,13 @@ class Agent:
 
         '''self.updateValues() we cannot choose actions and update values based on
         rewards we will have to figure out how to do this'''
-        marketReward = self.evaluate()# evaluate performace of agent, this is issue for much longer down road
-        return self.latestReward, marketReward/30
+        marketReward = self.evaluate()
+        normalizedReward = self.latestReward - marketReward
+        if learning:
+            self.rewardFile.write(str(normalizedReward) + "\n")
+        else:
+            self.rewardFileNoLearn.write(str(normalizedReward) + "\n")
+        return self.latestReward, marketReward / 30
 
     def getQVal(self):
         return self.decisionMaker.getQVal()
@@ -62,7 +70,7 @@ class Agent:
         #for pos in self.ownedPositions:
         if(len(self.ownedPositions) >= 1):
             self.cash = self.ownedPositions[0].getCurrentPrice()*self.numHoldings
-            print("Sold   ", self.numHoldings, "shares of ", self.ownedPositions[0].getTicker(), " at price ", self.ownedPositions[0].getCurrentPrice(), " each")
+            #print("Sold   ", self.numHoldings, "shares of ", self.ownedPositions[0].getTicker(), " at price ", self.ownedPositions[0].getCurrentPrice(), " each")
         else:
             print("Cash: ", self.cash)
 
@@ -70,7 +78,7 @@ class Agent:
         self.numHoldings = self.cash / float(actualPosition.getCurrentPrice())
         self.cash = 0
         self.ownedPositions = [actualPosition]
-        print("Bought ", self.numHoldings, "shares of ", actualPosition.getTicker(), " at price ", actualPosition.getCurrentPrice(), " each")
+        #print("Bought ", self.numHoldings, "shares of ", actualPosition.getTicker(), " at price ", actualPosition.getCurrentPrice(), " each")
 
     def analyzeHeadline(self, headline):
         '''Analyze a string (headline) and return whether it is positive, negative or neutral.'''
@@ -83,11 +91,12 @@ class Agent:
     def calculateHoldingsWorth(self, positions):
         '''Calculate the worth of the agent's positions according to the market'''
         worth = 0
+
         #get the updated position and then add it's price to worth
-        if(len(positions)==1):
+        if(len(positions) == 1):
             worth += self.market.getPositionByTicker(positions[0].getTicker()).getCurrentPrice() * self.numHoldings
         else:
-            worth+= self.cash
+            worth += self.cash
 
         return worth
 
@@ -98,25 +107,23 @@ class Agent:
         for pos in positions:
             avgValue += pos.getCurrentPrice()
             i += 1
-
         diff = avgValue - self.yesterdayValue
         self.yesterdayValue = avgValue
         return diff
 
     def getAverages(self):
-
         positions = self.market.getPositions()
-
         averages = []
         i = 0
         avgValue = 0
         for pos in positions:
             avgValue = pos.getCurrentPrice()
-            #print(pos.getTicker())
             averages.append(avgValue)
             i += 1
-
         return averages
+
+    def closeFiles(self):
+        self.rewardFile.close()
 
 class LinearSarsaLearner:
     '''Represents an agent using SARSA with linear value function approximation, assuming binary features.'''

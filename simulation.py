@@ -3,16 +3,12 @@ import market
 import sys
 
 def main():
-
     filename = sys.argv[1]
     days = int(sys.argv[2])
 
-    txtFile = open(filename,"r")
+    txtFile = open(filename, "r")
 
     lines = txtFile.readlines()
-
-    #for line in lines: read files if need be,  currently data needs to be in
-    #the format of a list of lines where each line is a new day (see example trainingset)
 
     data = lines
     localMarket = market.Market(data)
@@ -33,25 +29,26 @@ def main():
 
     totalReward = 0
     marketReward = 0
-    secStartAverages = localAgent.getAverages()
+    '''secStartAverages = localAgent.getAverages()
     for i in range(days):
         tReward, mReward = localAgent.update(False)
         totalReward += tReward
         marketReward += mReward
-    secEndAverages = localAgent.getAverages()
+    secEndAverages = localAgent.getAverages()'''
 
     learningAverages = []
     learnedAverages = []
     for i in range(len(startAverages)):
         learningAverages.append((endAverages[i] - startAverages[i]) / startAverages[i])
-        learnedAverages.append((secEndAverages[i] - secStartAverages[i]) / secStartAverages[i])
+        #learnedAverages.append((secEndAverages[i] - secStartAverages[i]) / secStartAverages[i])
 
     marketAverage = sum(learningAverages) / len(learningAverages)
-    secMarketAvg = sum(learnedAverages) / len(learnedAverages)
+    #secMarketAvg = sum(learnedAverages) / len(learnedAverages)
 
     print("\n\n\n---Averages---  ", "Agent", "\t\t\t", "Market")
     print("Learning Phase: ", learningTotal, "\t", (marketAverage * 100))
-    print("Learned  Phase: ", totalReward, "\t", (secMarketAvg * 100), "\n")
+    #print("Learned  Phase: ", totalReward, "\t", (secMarketAvg * 100), "\n")
+    localAgent.closeFiles()
 
 def testStuff():
     testSentence = "I hate everything, it all sucks"
