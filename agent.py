@@ -14,6 +14,10 @@ class Agent:
         self.deltaValue = 0
         self.decisionMaker = LinearSarsaLearner(3, len(self.market.getPositions()), .1, .1, .9) ##numFeatures, numActions, alpha, epsilon, gamma
 
+        self.rewardIntervalSum = 0
+        self.rewardIntervalCount = 0
+        self.normalizedRewardIntervalLength = 10
+        self.skipFirst = True
         self.rewardFile = open("NormalizedRewards.txt", "w")
         self.rewardFileNoLearn = open("NormalizedRewardsNoL.txt", "w")
 
@@ -45,11 +49,21 @@ class Agent:
         '''self.updateValues() we cannot choose actions and update values based on
         rewards we will have to figure out how to do this'''
         marketReward = self.evaluate()
-        normalizedReward = self.latestReward - marketReward
-        if learning:
-            self.rewardFile.write(str(normalizedReward) + "\n")
+        self.rewardIntervalCount += 1
+        if not self.skipFirst:
+            normalizedReward = self.latestReward - marketReward
+            self.rewardIntervalSum += normalizedReward
+            if self.rewardIntervalCount == self.normalizedRewardIntervalLength:
+                averageNormalizedReward = self.rewardIntervalSum / self.normalizedRewardIntervalLength
+                self.rewardIntervalCount = 0
+                self.rewardIntervalSum = 0
+                if learning:
+                    self.rewardFile.write(str(averageNormalizedReward) + "\n")
+                else:
+                    self.rewardFileNoLearn.write(str(averageNormalizedReward) + "\n")
         else:
-            self.rewardFileNoLearn.write(str(normalizedReward) + "\n")
+            self.rewardIntervalSum += 0
+        self.skipFirst = False
         return self.latestReward, marketReward / 30
 
     def getQVal(self):
@@ -124,6 +138,7 @@ class Agent:
 
     def closeFiles(self):
         self.rewardFile.close()
+        self.rewardFileNoLearn.close()
 
 class LinearSarsaLearner:
     '''Represents an agent using SARSA with linear value function approximation, assuming binary features.'''
