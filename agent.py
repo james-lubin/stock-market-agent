@@ -76,6 +76,8 @@ class Agent:
 
         '''self.updateValues() we cannot choose actions and update values based on
         rewards we will have to figure out how to do this'''
+
+        #comment
         marketReward = self.evaluate()
         self.rewardIntervalCount += 1
         if not self.skipFirst:
