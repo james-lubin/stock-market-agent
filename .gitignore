@@ -11,6 +11,9 @@ Data/
 Report 1.pdf
 natural_langauge_processing
 stock-market-agent.zip
+NormalizedRewards.txt
+NormalizedRewardsNoL.txt
+*.xlsx
 
 # Distribution / packaging
 .Python
