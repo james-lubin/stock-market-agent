@@ -15,7 +15,17 @@ class Agent:
         self.deltaValue = 0
         self.decisionMaker = LinearSarsaLearner(3, len(self.market.getPositions()), .1, .1, .9) ##numFeatures, numActions, alpha, epsilon, gamma
 
+<<<<<<< Updated upstream
         self.analyzer = Sentiment()
+=======
+        self.rewardIntervalSum = 0
+        self.rewardIntervalCount = 0
+        self.normalizedRewardIntervalLength = 1
+        self.skipFirst = True
+        self.rewardFile = open("NormalizedRewards.txt", "w")
+        self.rewardFileNoLearn = open("NormalizedRewardsNoL.txt", "w")
+
+>>>>>>> Stashed changes
         self.lastAction = 0
         self.yesterdayValue = 0
         self.market.updateMarket()
@@ -31,7 +41,12 @@ class Agent:
 
         nextFeatures = self.market.getActiveFeatures()
         currentWorth = self.calculateHoldingsWorth(self.ownedPositions)
+        prevReward = self.latestReward
         self.latestReward = currentWorth - previousWorth
+        if prevReward != 0:
+            rewardPercentageGained = ((self.latestReward - prevReward) / abs(prevReward)) * 100
+        else:
+            rewardPercentageGained = (self.latestReward - prevReward)
 
         self.decisionMaker.updateReward(self.latestReward,nextAction,self.lastAction,activeFeatures,nextFeatures)
         self.lastAction = nextAction
