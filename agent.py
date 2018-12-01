@@ -21,7 +21,7 @@ class Agent:
 
         self.rewardIntervalSum = 0
         self.rewardIntervalCount = 0
-        self.normalizedRewardIntervalLength = 2
+        self.normalizedRewardIntervalLength = 100
         self.skipFirst = True
         self.rewardFile = open("NormalizedRewards.txt", "w")
         self.rewardFileNoLearn = open("NormalizedRewardsNoL.txt", "w")
@@ -56,7 +56,7 @@ class Agent:
 
         self.updatePreviousPrices()
         self.market.updateMarket()
-        
+
         self.marketPrices = self.getPrices()
 
 
@@ -79,7 +79,7 @@ class Agent:
 
         #comment
         marketReward = self.evaluate()
-        self.rewardIntervalCount += 1
+
         if not self.skipFirst:
 
             avgChange = self.getMarketAverageChange(oldMarketPrices,self.marketPrices)
@@ -95,6 +95,7 @@ class Agent:
                     self.rewardFileNoLearn.write(str(averageNormalizedReward) + "\n")
         else:
             self.rewardIntervalSum += 0
+        self.rewardIntervalCount += 1
         self.skipFirst = False
         return self.latestReward, marketReward / 30
 
@@ -139,21 +140,21 @@ class Agent:
 
         oldPositionH = self.numHoldings[:]
         oldPositions = self.ownedPositionNums[:]
-        
+
         for i in range(len(self.ownedPositionNums)):
             if(self.ownedPositionNums[i]==oldPosition):
                 oldPosIdx = i
 
 
         #self.cash = self.market.getPositions()[oldPosition].getCurrentPrice()*self.numHoldings
-        self.cash = self.ownedPositions[oldPosIdx].getCurrentPrice()*self.numHoldings[oldPosIdx]                             
+        self.cash = self.ownedPositions[oldPosIdx].getCurrentPrice()*self.numHoldings[oldPosIdx]
         self.ownedPositionNums.remove(oldPosition)
         self.ownedPositions.remove(self.market.getPositions()[oldPosition])
         self.numHoldings.pop(oldPosIdx)
         #print("Sold   ", self.numHoldings, "shares of ", self.ownedPositions[0].getTicker(), " at price ", self.ownedPositions[0].getCurrentPrice(), " each")
 
 
-        
+
         actualPosition = self.market.getPosition(newPosition)
         self.numHoldings.append((self.cash-.001) / float(actualPosition.getCurrentPrice()))
         self.cash = 0
@@ -301,7 +302,7 @@ class LinearSarsaLearner:
         sell= 0
         if(len(positions)>0):
             sell = positions[0]
-            minQ = self.getQValue(activeFeatures, sell)   
+            minQ = self.getQValue(activeFeatures, sell)
         greedyAction = 0
         for i in range (0, self.numActions):
             action = i
