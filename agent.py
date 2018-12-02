@@ -26,6 +26,8 @@ class Agent:
         self.skipFirst = True
         self.rewardFile = open("NormalizedRewards.txt", "w")
 
+        self.wLIntervals = []
+        self.wLIntervals.append([0,0])
         self.lastAction = 0
         self.yesterdayValue = 0
         self.market.updateMarket()
@@ -85,11 +87,16 @@ class Agent:
             avgChange = self.getMarketAverageChange(oldMarketPrices,self.marketPrices)
             normalizedReward = self.latestRewardPercent - avgChange
             self.rewardIntervalSum += normalizedReward
+            if(normalizedReward > 0):
+                self.wLIntervals[-1][0] = self.wLIntervals[-1][0] +1
+            else:
+                self.wLIntervals[-1][1] = self.wLIntervals[-1][1] +1
             if self.rewardIntervalCount == self.normalizedRewardIntervalLength:
                 averageNormalizedReward = self.rewardIntervalSum / self.normalizedRewardIntervalLength
                 self.rewardIntervalCount = 0
                 self.rewardIntervalSum = 0
                 self.normalizedRewardList.append(normalizedReward)
+                self.wLIntervals.append([0,0])
                 #self.rewardFile.write(str(averageNormalizedReward) + "\n")
         else:
             self.rewardIntervalSum += self.latestRewardPercent
@@ -99,6 +106,9 @@ class Agent:
 
     def getQVal(self):
         return self.decisionMaker.getQVal()
+
+    def getWinLose(self):
+        return self.wLIntervals
 
     def getMarketAverageChange(self, oPrices, nPrices):
 

@@ -13,6 +13,7 @@ def main():
     data = lines
     rewardLists = []
     totalRewards = []
+    totalWins = []
     rewardIntervalLength = 100
 
     for t in range(trials):
@@ -30,6 +31,7 @@ def main():
         endAverages = localAgent.getAverages()
         rewardLists.append(localAgent.getNormalizedRewardList())
         totalRewards.append(totalReward)
+        totalWins.append(localAgent.getWinLose())
         learningTotal, learningMarketReward = totalReward, marketReward
 
         print("\n\n-------------------Results-------------------")
@@ -43,14 +45,25 @@ def main():
         localAgent.closeFiles()
 
     normRewardsAvgsFile = open("NormalizedRewardAverages.txt", "w")
+    winAvgsFile = open("averagesWins.txt", "w")
     numIntervals = math.ceil(days / rewardIntervalLength)
     numLists = trials
     for interval in range(numIntervals):
         dailyRewardSum = 0
+        dailyWins = 0
+        dailyLoses = 0
         for rewardList in rewardLists:
             dailyRewardSum += rewardList[interval]
+
+        for wins in totalWins:
+            dailyWins += wins[interval][0]
+            dailyLoses += wins[interval][1]
+
+        avgWins = dailyWins/numLists
+        avgLoses = dailyLoses/numLists
         intervalAverage = dailyRewardSum / numLists
         normRewardsAvgsFile.write(str(intervalAverage) + "\n")
+        winAvgsFile.write(str(avgWins)+"\t"+str(avgLoses) + "\n")
 
     totalRewardAvg = sum(totalRewards)/len(totalRewards)
 
