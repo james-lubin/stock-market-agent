@@ -3,7 +3,7 @@ from tilefeatures import *
 import abc
 
 class Agent:
-    def __init__(self, m):
+    def __init__(self, m, rewardIntervalLength):
         self.market = m #the market
 
         self.ownedPositions = [] #a list of positons that the agent is currently holding
@@ -17,14 +17,14 @@ class Agent:
 
         self.cash = 100  #how much our agent has to spend
         self.deltaValue = 0
-        self.decisionMaker = LinearSarsaLearner(3, len(self.market.getPositions()), .1, .1, .9) ##numFeatures, numActions, alpha, epsilon, gamma
+        self.decisionMaker = LinearSarsaLearner(3, len(self.market.getPositions()), .01, .1, .6) ##numFeatures, numActions, alpha, epsilon, gamma
 
         self.rewardIntervalSum = 0
-        self.rewardIntervalCount = 0
-        self.normalizedRewardIntervalLength = 100
+        self.rewardIntervalCount = 1
+        self.normalizedRewardIntervalLength = rewardIntervalLength
+        self.normalizedRewardList = []
         self.skipFirst = True
         self.rewardFile = open("NormalizedRewards.txt", "w")
-        self.rewardFileNoLearn = open("NormalizedRewardsNoL.txt", "w")
 
         self.lastAction = 0
         self.yesterdayValue = 0
@@ -80,7 +80,7 @@ class Agent:
         #comment
         marketReward = self.evaluate()
 
-        if not self.skipFirst:
+        if self.skipFirst == False:
 
             avgChange = self.getMarketAverageChange(oldMarketPrices,self.marketPrices)
             normalizedReward = self.latestRewardPercent - avgChange
@@ -89,12 +89,10 @@ class Agent:
                 averageNormalizedReward = self.rewardIntervalSum / self.normalizedRewardIntervalLength
                 self.rewardIntervalCount = 0
                 self.rewardIntervalSum = 0
-                if learning:
-                    self.rewardFile.write(str(averageNormalizedReward) + "\n")
-                else:
-                    self.rewardFileNoLearn.write(str(averageNormalizedReward) + "\n")
+                self.normalizedRewardList.append(normalizedReward)
+                #self.rewardFile.write(str(averageNormalizedReward) + "\n")
         else:
-            self.rewardIntervalSum += 0
+            self.rewardIntervalSum += self.latestRewardPercent
         self.rewardIntervalCount += 1
         self.skipFirst = False
         return self.latestReward, marketReward / 30
@@ -178,8 +176,11 @@ class Agent:
         '''Get the reward for the latest day'''
         return self.latestReward
 
-    def updatePreviousPrices(self):
+    def getNormalizedRewardList(self):
+        '''Return the entire history of normalized rewards'''
+        return self.normalizedRewardList
 
+    def updatePreviousPrices(self):
         newPrices = []
         self.changeInPrices = []
         i=0
@@ -246,7 +247,6 @@ class Agent:
 
     def closeFiles(self):
         self.rewardFile.close()
-        self.rewardFileNoLearn.close()
 
 class LinearSarsaLearner:
     '''Represents an agent using SARSA with linear value function approximation, assuming binary features.'''
