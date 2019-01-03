@@ -14,6 +14,7 @@ stock-market-agent.zip
 NormalizedRewards.txt
 NormalizedRewardsNoL.txt
 *.xlsx
+TotalRewards.txt
 
 # Distribution / packaging
 .Python
