@@ -24,7 +24,6 @@ class Agent:
         self.normalizedRewardIntervalLength = rewardIntervalLength
         self.normalizedRewardList = []
         self.skipFirst = True
-        self.rewardFile = open("NormalizedRewards.txt", "w")
 
         self.lastAction = 0
         self.yesterdayValue = 0
@@ -89,7 +88,7 @@ class Agent:
                 averageNormalizedReward = self.rewardIntervalSum / self.normalizedRewardIntervalLength
                 self.rewardIntervalCount = 0
                 self.rewardIntervalSum = 0
-                self.normalizedRewardList.append(normalizedReward)
+                self.normalizedRewardList.append(averageNormalizedReward);
                 #self.rewardFile.write(str(averageNormalizedReward) + "\n")
         else:
             self.rewardIntervalSum += self.latestRewardPercent
@@ -246,7 +245,7 @@ class Agent:
         return averages
 
     def closeFiles(self):
-        self.rewardFile.close()
+        pass;
 
 class LinearSarsaLearner:
     '''Represents an agent using SARSA with linear value function approximation, assuming binary features.'''

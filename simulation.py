@@ -43,7 +43,7 @@ def main():
         localAgent.closeFiles()
 
     normRewardsAvgsFile = open("NormalizedRewardAverages.txt", "w")
-    numIntervals = math.ceil(days / rewardIntervalLength)
+    numIntervals = len(rewardLists[0]) #all intervals should have the same length reward list
     numLists = trials
     for interval in range(numIntervals):
         dailyRewardSum = 0
