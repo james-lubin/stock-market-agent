@@ -1,52 +1,68 @@
 import agent
 import market
 import sys
-import news
+import math
 
 def main():
-
     filename = sys.argv[1]
     days = int(sys.argv[2])
+    trials = int(sys.argv[3])
 
-    txtFile = open(filename,"r")
-
+    txtFile = open(filename, "r")
     lines = txtFile.readlines()
-
-    #for line in lines: read files if need be,  currently data needs to be in
-    #the format of a list of lines where each line is a new day (see example trainingset)
-
     data = lines
-    localMarket = market.Market(data)
-    localAgent = agent.Agent(localMarket)
+    rewardLists = []
+    totalRewards = []
+    rewardIntervalLength = 100
 
-    totalReward = 0
-    marketReward = 0
-    for i in range(days):
-        tReward, mReward = localAgent.update(True)
-        totalReward += tReward
-        marketReward += mReward
+    for t in range(trials):
+        localMarket = market.Market(data)
+        localAgent = agent.Agent(localMarket, rewardIntervalLength)
 
-    learningTotal, learningMarketReward = totalReward, marketReward
-    print("Learning phase ended!------------------------------------------\n\n\n")
+        totalReward = 0
+        marketReward = 0
 
-    totalReward = 0
-    marketReward = 0
-    for i in range(days):
-        tReward, mReward = localAgent.update(False)
-        totalReward+=tReward
-        marketReward += mReward
+        startAverages = localAgent.getAverages()
+        for d in range(days):
+            tReward, mReward = localAgent.update(True)
+            totalReward += tReward
+            marketReward += mReward
+        endAverages = localAgent.getAverages()
+        rewardLists.append(localAgent.getNormalizedRewardList())
+        totalRewards.append(totalReward)
+        learningTotal, learningMarketReward = totalReward, marketReward
 
-    print("Learning Phase: ", learningTotal, learningMarketReward)
-    print("Learned Phase: ", totalReward, marketReward)
-    print(localAgent.getQVal())
+        print("\n\n-------------------Results-------------------")
+        print("Trial ", t + 1)
+        print("Total Reward: ", learningTotal)
+        print("Market Reward: ", learningMarketReward)
 
-def testStuff():
-    testSentence = "I hate everything, it all sucks"
-    res = localAgent.analyzeHeadline(testSentence)
-    print("Sentence: ", testSentence, "\tSentiment: ", res)
+        totalReward = 0
+        marketReward = 0
 
-    #news testing
-    myNews = news.News()
-    print(myNews.getHeadlines("Microsoft", 5, "2018-10-14", "2018-10-21"))
+        localAgent.closeFiles()
+
+    normRewardsAvgsFile = open("NormalizedRewardAverages.txt", "w")
+    numIntervals = len(rewardLists[0]) #all intervals should have the same length reward list
+    numLists = trials
+    for interval in range(numIntervals):
+        dailyRewardSum = 0
+        for rewardList in rewardLists:
+            dailyRewardSum += rewardList[interval]
+        intervalAverage = dailyRewardSum / numLists
+        normRewardsAvgsFile.write(str(intervalAverage) + "\n")
+
+    totalRewardAvg = sum(totalRewards)/len(totalRewards)
+
+    print("\n\n-------------------TRIALS COMPLETED-------------------")
+    print("Average Profit: ", totalRewardAvg)
+
+    rewardFile = open("TotalRewards.txt", "w")
+    for reward in totalRewards:
+        rewardFile.write(str(reward) + "\n")
+    normRewardsAvgsFile.close()
+
+
+
 
 main()

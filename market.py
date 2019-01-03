@@ -1,6 +1,4 @@
 import os
-import natural_language_processing
-import news
 
 class Market:
     def __init__(self, p):
@@ -52,7 +50,6 @@ class Position:
 
         self.dayIndex = 0
         self.currentSentiment = 0
-        self.news = news.News()
 
         line  = self.txtList[self.dayIndex]
         date = line.split(",")[0]
